@@ -1,6 +1,12 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import 'dotenv/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { TenantService } from './tenancy/tenant.service';
+import { TenantConnectionProvider } from './tenancy/tenant-connection.provider';
+import { Patient } from './entities/patient.entity';
+import { TenantMiddleware } from './tenancy/tenant.middleware';
+import { createTenantEntityProvider } from './tenancy/tenant-entity.provider';
+import { Appointment } from './entities/appointment.entity';
 
 @Module({
   imports: [
@@ -16,5 +22,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       synchronize: true, // Disable in production after initial setup
     }),
   ],
+    providers: [
+    TenantConnectionProvider,
+    TenantService,
+    ...createTenantEntityProvider([Appointment, Patient]),
+  ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(TenantMiddleware).forRoutes("*");
+  }
+}
