@@ -8,6 +8,9 @@ export class User {
   @Column({ unique: true })
   clerkUserId: string;
 
+  @Column({ unique: true })
+  stripeCustomerId: string;
+
   @Column()
   role: string; // 'admin', 'doctor', 'clerk', 'manager'
 
@@ -19,6 +22,9 @@ export class User {
 
   @Column()
   lastName: string;
+
+  @Column({ type: 'text', default: 'free' })
+  currentPlan: string
 
   @Column()
   phone: string;

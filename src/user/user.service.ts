@@ -33,4 +33,11 @@ export class UserService {
   async findByClerkId(clerkUserId: string) {
     return this.userRepository.findOne({ where: { clerkUserId } });
   }
+
+    async updateUserPlan(id: string, plan: string) {
+    const user = await this.userRepository.findOne({ where: { id } })
+    if (!user) return this.userRepository.save({ id, currentPlan: plan, email: '', createdAt: new Date() })
+    user.currentPlan = plan
+    return this.userRepository.save(user)
+  }
 }

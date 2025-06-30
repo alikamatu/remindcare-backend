@@ -6,7 +6,7 @@ export class ClerkService {
   private clerk: ReturnType<typeof Clerk>;
 
   constructor() {
-    this.clerk = Clerk({ secretKey: process.env.CLERK_SECRET_KEY });
+    this.clerk = Clerk({ secretKey: process.env.CLERK_SECRET_KEY});
   }
 
   async updateUserMetadata(userId: string, metadata: Record<string, any>) {
