@@ -1,30 +1,57 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { User } from '../user/user.entity';
-import { Facility } from '../facility/facility.entity';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { AppointmentStatus, AppointmentChannel } from '../shared/constants/appointment.constants';
+import { Patient } from 'src/shared/entities/patient.entity';
+import { Facility } from 'src/shared/entities/facility.entity';
+import { Doctor } from 'src/shared/entities/doctor.entity';
 
 @Entity()
 export class Appointment {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @ManyToOne(() => User, user => user.id)
-  patient: string;
+  @ManyToOne(() => Patient, { eager: true })
+  @JoinColumn()
+  patient: Patient;
 
-  @ManyToOne(() => Facility, facility => facility.id)
-  facility: string;
+  @ManyToOne(() => Facility, { eager: true })
+  @JoinColumn()
+  facility: Facility;
 
-  @Column({ type: 'timestamptz' })
+  @ManyToOne(() => Doctor, { eager: true })
+  @JoinColumn()
+  doctor: Doctor;
+
+  @Column({ type: 'timestamp' })
   date: Date;
 
-  @Column({ 
-    type: 'enum', 
-    enum: ['scheduled', 'confirmed', 'cancelled', 'no-show'] 
+  @Column({
+    type: 'enum',
+    enum: AppointmentStatus,
+    default: AppointmentStatus.PENDING,
   })
-  status: string;
+  status: AppointmentStatus;
 
-  @Column()
-  channel: string; // 'sms', 'ivr', 'whatsapp'
+  @Column({
+    type: 'enum',
+    enum: AppointmentChannel,
+  })
+  channel: AppointmentChannel;
 
-  @Column()
+  @Column({ default: 'en' })
   language: string;
+
+  @Column({ type: 'jsonb', nullable: true })
+  reminders: { time: Date; channel: string; sent: boolean }[];
+
+  @Column({ type: 'jsonb', nullable: true })
+  history: { event: string; timestamp: Date; details: any }[];
+
+  @Column({ nullable: true })
+  riskLevel: string;
+
+  @Column({ nullable: true })
+  noShowProbability: number;
+
+  @Column()
+  userId: string; // Clerk user ID
 }

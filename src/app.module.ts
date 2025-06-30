@@ -2,12 +2,16 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user/user.entity';
-import { Facility } from './facility/facility.entity';
 import { Appointment } from './appointment/appointment.entity';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { BillingModule } from './billing/billing.module';
 import { WebhookModule } from './webhook/webhook.module';
+import { AppointmentModule } from './appointment/apointment.module';
+import { RemindersModule } from './reminders/reminders.module';
+import { Patient } from './shared/entities/patient.entity';
+import { Doctor } from './shared/entities/doctor.entity';
+import { Facility } from './shared/entities/facility.entity';
 
 @Module({
   imports: [
@@ -17,7 +21,7 @@ import { WebhookModule } from './webhook/webhook.module';
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
         url: config.get<string>('DATABASE_URL'),
-        entities: [User, Facility, Appointment],
+        entities: [User, Appointment, Patient, Doctor, Facility],
         synchronize: true, // Disable in production
         logging: true,
         ssl: {
@@ -29,6 +33,8 @@ import { WebhookModule } from './webhook/webhook.module';
     UserModule,
     BillingModule,
     WebhookModule,
+    AppointmentModule,
+    RemindersModule,
     // Add other modules here
   ],
 })

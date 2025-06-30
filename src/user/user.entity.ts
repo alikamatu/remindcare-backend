@@ -8,7 +8,7 @@ export class User {
   @Column({ unique: true })
   clerkUserId: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   stripeCustomerId: string;
 
   @Column()
