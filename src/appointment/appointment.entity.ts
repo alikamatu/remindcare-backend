@@ -1,8 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { AppointmentStatus, AppointmentChannel } from '../shared/constants/appointment.constants';
-import { Patient } from 'src/shared/entities/patient.entity';
-import { Facility } from 'src/shared/entities/facility.entity';
-import { Doctor } from 'src/shared/entities/doctor.entity';
+import { Patient } from 'src/management/patients/patients.entity';
+import { Facility } from 'src/management/facilities/facilities.entity';
+import { Doctor } from 'src/management/doctors/doctors.entity';
 
 @Entity()
 export class Appointment {

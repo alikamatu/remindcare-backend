@@ -9,9 +9,10 @@ import { BillingModule } from './billing/billing.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { AppointmentModule } from './appointment/apointment.module';
 import { RemindersModule } from './reminders/reminders.module';
-import { Patient } from './shared/entities/patient.entity';
-import { Doctor } from './shared/entities/doctor.entity';
-import { Facility } from './shared/entities/facility.entity';
+import { Patient } from './management/patients/patients.entity';
+import { Doctor } from './management/doctors/doctors.entity';
+import { Facility } from './management/facilities/facilities.entity';
+import { ManagementModule } from './management/management.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { Facility } from './shared/entities/facility.entity';
     WebhookModule,
     AppointmentModule,
     RemindersModule,
+    ManagementModule,
     // Add other modules here
   ],
 })
