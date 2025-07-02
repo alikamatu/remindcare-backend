@@ -4,9 +4,9 @@ import {
   Post, 
   Body, 
   Param, 
+  Patch, 
   Delete, 
-  UseGuards, 
-  Put
+  UseGuards 
 } from '@nestjs/common';
 import { FacilitiesService } from './facilities.service';
 import { CreateFacilityDto } from './dto/create-facility.dto';
@@ -14,9 +14,6 @@ import { UpdateFacilityDto } from './dto/update-facility.dto';
 import { Facility } from './facilities.entity';
 import { ApiBearerAuth, ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ClerkGuard } from 'src/clerk/clerk.guard';
-import { User as UserEntity } from 'src/user/user.entity';
-import { User } from 'src/user/user.decorators';
-
 
 @ApiTags('Management - Facilities')
 @ApiBearerAuth()
@@ -25,22 +22,19 @@ import { User } from 'src/user/user.decorators';
 export class FacilitiesController {
   constructor(private readonly facilitiesService: FacilitiesService) {}
 
-@Post()
-@ApiOperation({ summary: 'Create a new facility' })
-@ApiResponse({ status: 201, description: 'Facility created', type: Facility })
-create(
-  @Body() createFacilityDto: CreateFacilityDto,
-  @User() user: UserEntity,
-): Promise<Facility> {
-  return this.facilitiesService.create(createFacilityDto, user);
-}
+  @Post()
+  @ApiOperation({ summary: 'Create a new facility' })
+  @ApiResponse({ status: 201, description: 'Facility created', type: Facility })
+  create(@Body() createFacilityDto: CreateFacilityDto): Promise<Facility> {
+    return this.facilitiesService.create(createFacilityDto);
+  }
 
-@Get()
-@ApiOperation({ summary: 'Get all facilities' })
-@ApiResponse({ status: 200, description: 'List of facilities', type: [Facility] })
-findAll(@User() user: UserEntity): Promise<Facility[]> {
-  return this.facilitiesService.findAll(user);
-}
+  @Get()
+  @ApiOperation({ summary: 'Get all facilities' })
+  @ApiResponse({ status: 200, description: 'List of facilities', type: [Facility] })
+  findAll(): Promise<Facility[]> {
+    return this.facilitiesService.findAll();
+  }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a facility by ID' })
@@ -49,15 +43,15 @@ findAll(@User() user: UserEntity): Promise<Facility[]> {
     return this.facilitiesService.findOne(+id);
   }
 
-@Put(':id')
-@ApiOperation({ summary: 'Replace a facility' })
-@ApiResponse({ status: 200, description: 'Facility replaced', type: Facility })
-replace(
-  @Param('id') id: string,
-  @Body() updateFacilityDto: UpdateFacilityDto,
-): Promise<Facility> {
-  return this.facilitiesService.update(+id, updateFacilityDto);
-}
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update a facility' })
+  @ApiResponse({ status: 200, description: 'Facility updated', type: Facility })
+  update(
+    @Param('id') id: string,
+    @Body() updateFacilityDto: UpdateFacilityDto,
+  ): Promise<Facility> {
+    return this.facilitiesService.update(+id, updateFacilityDto);
+  }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a facility' })

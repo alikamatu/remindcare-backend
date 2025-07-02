@@ -63,7 +63,7 @@ export class PatientsController {
   @Post('demo')
   @ApiOperation({ summary: 'Generate demo patients' })
   @ApiResponse({ status: 201, description: 'Demo patients created', type: [Patient] })
-  generateDemo(@Body('user') user: any): Promise<Patient[]> {
-    return this.patientsService.generateDemo(user);
+  generateDemo(): Promise<Patient[]> {
+    return this.patientsService.generateDemo();
   }
 }

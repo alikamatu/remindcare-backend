@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Patient } from './patients.entity';
-import { CreatePatientDto } from './dto/create-patient.dto';
-import { UpdatePatientDto } from './dto/update-patient.dto';
+import { Patient } from '../patients/patients.entity';
+import { CreatePatientDto } from '../patients/dto/create-patient.dto';
+import { UpdatePatientDto } from '../patients/dto/update-patient.dto';
 import { FacilitiesService } from '../facilities/facilities.service';
 
 @Injectable()
@@ -57,9 +57,9 @@ export class PatientsService {
     }
   }
 
-  async generateDemo(user: any): Promise<Patient[]> {
+  async generateDemo(): Promise<Patient[]> {
     // Get existing facilities
-    const facilities = await this.facilitiesService.findAll(user);
+    const facilities = await this.facilitiesService.findAll();
     if (facilities.length === 0) {
       throw new NotFoundException('No facilities found. Create facilities first.');
     }

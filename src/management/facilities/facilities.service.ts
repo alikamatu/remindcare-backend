@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { Facility } from './facilities.entity';
 import { CreateFacilityDto } from './dto/create-facility.dto';
 import { UpdateFacilityDto } from './dto/update-facility.dto';
-import { User } from 'src/user/user.entity';
 
 @Injectable()
 export class FacilitiesService {
@@ -13,16 +12,13 @@ export class FacilitiesService {
     private facilityRepository: Repository<Facility>,
   ) {}
 
-  async create(createFacilityDto: CreateFacilityDto, user: User): Promise<Facility> {
-    const facility = this.facilityRepository.create({
-      ...createFacilityDto,
-      user, // associate facility with the user
-    });
+  async create(createFacilityDto: CreateFacilityDto): Promise<Facility> {
+    const facility = this.facilityRepository.create(createFacilityDto);
     return this.facilityRepository.save(facility);
   }
 
-  async findAll(user: User): Promise<Facility[]> {
-    return this.facilityRepository.find({ where: { user: { id: user.id } } });
+  async findAll(): Promise<Facility[]> {
+    return this.facilityRepository.find();
   }
 
   async findOne(id: number): Promise<Facility> {

@@ -11,7 +11,6 @@ export class ClerkGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
-    const { userId } = getAuth(req);
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) throw new UnauthorizedException();
 
@@ -25,14 +24,7 @@ export class ClerkGuard implements CanActivate {
       issuer: process.env.CLERK_ISSUER,
     });
 
-    if (!userId) return false;
-
     req.user = verified;
-    req.user = { userId };
     return true;
   }
-}
-
-function getAuth(req: any): { userId: any; } {
-  throw new Error('Function not implemented.');
 }

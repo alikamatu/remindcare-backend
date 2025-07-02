@@ -5,7 +5,6 @@ import { Doctor } from './doctors.entity';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { UpdateDoctorDto } from './dto/update-doctor.dto';
 import { FacilitiesService } from '../facilities/facilities.service';
-import { User } from 'src/user/user.entity';
 
 @Injectable()
 export class DoctorsService {
@@ -15,27 +14,23 @@ export class DoctorsService {
     private facilitiesService: FacilitiesService,
   ) {}
 
-  async create(createDoctorDto: CreateDoctorDto, user: User): Promise<Doctor> {
+  async create(createDoctorDto: CreateDoctorDto): Promise<Doctor> {
     const facility = await this.facilitiesService.findOne(createDoctorDto.facilityId);
     const doctor = this.doctorRepository.create({
       ...createDoctorDto,
-      facility,
-      user, // link doctor to user
+      facility
     });
     return this.doctorRepository.save(doctor);
   }
 
-  async findAll(user: User): Promise<Doctor[]> {
-    return this.doctorRepository.find({
-      where: { user: { id: user.id } },
-      relations: ['facility'],
-    });
+  async findAll(): Promise<Doctor[]> {
+    return this.doctorRepository.find({ relations: ['facility'] });
   }
 
-  async findOne(id: number, user: User): Promise<Doctor> {
-    const doctor = await this.doctorRepository.findOne({
-      where: { id, user: { id: user.id } },
-      relations: ['facility'],
+  async findOne(id: number): Promise<Doctor> {
+    const doctor = await this.doctorRepository.findOne({ 
+      where: { id },
+      relations: ['facility']
     });
     if (!doctor) {
       throw new NotFoundException(`Doctor with ID ${id} not found`);
@@ -43,46 +38,45 @@ export class DoctorsService {
     return doctor;
   }
 
-  async update(id: number, updateDoctorDto: UpdateDoctorDto, user: User): Promise<Doctor> {
-    const doctor = await this.findOne(id, user);
-
+  async update(id: number, updateDoctorDto: UpdateDoctorDto): Promise<Doctor> {
+    const doctor = await this.findOne(id);
+    
     if (updateDoctorDto.facilityId) {
       const facility = await this.facilitiesService.findOne(updateDoctorDto.facilityId);
       doctor.facility = facility;
     }
-
+    
     Object.assign(doctor, updateDoctorDto);
     return this.doctorRepository.save(doctor);
   }
 
-  async remove(id: number, user: User): Promise<void> {
-    const doctor = await this.findOne(id, user);
-    const result = await this.doctorRepository.delete(doctor.id);
+  async remove(id: number): Promise<void> {
+    const result = await this.doctorRepository.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Doctor with ID ${id} not found`);
     }
   }
 
-  async generateDemo(user: User): Promise<Doctor[]> {
-    // Get existing facilities for this user
-    const facilities = await this.facilitiesService.findAll(user);
+  async generateDemo(): Promise<Doctor[]> {
+    // Get existing facilities
+    const facilities = await this.facilitiesService.findAll();
     if (facilities.length === 0) {
       throw new NotFoundException('No facilities found. Create facilities first.');
     }
-
+    
     const specialties = [
-      'Cardiology', 'Dermatology', 'Endocrinology',
+      'Cardiology', 'Dermatology', 'Endocrinology', 
       'Gastroenterology', 'Neurology', 'Oncology'
     ];
-
+    
     const demoDoctors: Doctor[] = [];
-
+    
     for (let i = 1; i <= 5; i++) {
       const firstName = `Doctor${i}`;
       const lastName = `Demo${i}`;
       const specialty = specialties[Math.floor(Math.random() * specialties.length)];
-
-      const doctorData: CreateDoctorDto = {
+      
+      const doctorData = {
         firstName,
         lastName,
         specialty,
@@ -100,11 +94,11 @@ export class DoctorsService {
           sunday: false
         }
       };
-
-      const doctor = await this.create(doctorData, user);
+      
+      const doctor = await this.create(doctorData);
       demoDoctors.push(doctor);
     }
-
+    
     return demoDoctors;
   }
 }
