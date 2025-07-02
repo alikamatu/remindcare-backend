@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Facility } from './facilities.entity';
 import { CreateFacilityDto } from './dto/create-facility.dto';
 import { UpdateFacilityDto } from './dto/update-facility.dto';
+import { User } from 'src/user/user.entity';
 
 @Injectable()
 export class FacilitiesService {
@@ -12,17 +13,30 @@ export class FacilitiesService {
     private facilityRepository: Repository<Facility>,
   ) {}
 
-  async create(createFacilityDto: CreateFacilityDto): Promise<Facility> {
-    const facility = this.facilityRepository.create(createFacilityDto);
+  // Create a facility for a user identified by clerkUserId
+  async create(createFacilityDto: CreateFacilityDto, clerkUserId: string): Promise<Facility> {
+    const user = await this.facilityRepository.manager.findOne(User, { where: { clerkUserId } });
+    if (!user) throw new NotFoundException('User not found');
+    const facility = this.facilityRepository.create({
+      ...createFacilityDto,
+      user,
+    });
     return this.facilityRepository.save(facility);
   }
 
-  async findAll(): Promise<Facility[]> {
-    return this.facilityRepository.find();
+  // Find all facilities for a user identified by clerkUserId
+  async findAll(clerkUserId: string): Promise<Facility[]> {
+    return this.facilityRepository.find({
+      where: { user: { clerkUserId } },
+      relations: ['user'],
+    });
   }
 
   async findOne(id: number): Promise<Facility> {
-    const facility = await this.facilityRepository.findOne({ where: { id } });
+    const facility = await this.facilityRepository.findOne({
+      where: { id },
+      relations: ['user'], // <-- add this line
+    });
     if (!facility) {
       throw new NotFoundException(`Facility with ID ${id} not found`);
     }
@@ -42,7 +56,11 @@ export class FacilitiesService {
     }
   }
 
-  async generateDemo(): Promise<Facility[]> {
+  // Generate demo facilities for a user identified by clerkUserId
+  async generateDemo(clerkUserId: string): Promise<Facility[]> {
+    const user = await this.facilityRepository.manager.findOne(User, { where: { clerkUserId } });
+    if (!user) throw new NotFoundException('User not found');
+
     const demoFacilities = [
       {
         name: 'Synchora Main Hospital',
@@ -84,10 +102,12 @@ export class FacilitiesService {
 
     const createdFacilities: Facility[] = [];
     for (const facilityData of demoFacilities) {
-      const facility = this.facilityRepository.create(facilityData);
+      const facility = this.facilityRepository.create({
+        ...facilityData,
+        user,
+      });
       createdFacilities.push(await this.facilityRepository.save(facility));
     }
-    
     return createdFacilities;
   }
 }

@@ -10,9 +10,6 @@ export class Facility extends BaseEntity {
   name: string;
 
   @Column()
-  userId: string;
-
-  @Column()
   address: string;
 
   @Column()

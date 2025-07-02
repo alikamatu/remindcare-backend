@@ -14,6 +14,7 @@ import { UpdateDoctorDto } from './dto/update-doctor.dto';
 import { Doctor } from './doctors.entity';
 import { ApiBearerAuth, ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ClerkGuard } from 'src/clerk/clerk.guard';
+import { User } from 'src/user/user.decorators';
 
 @ApiTags('Management - Doctors')
 @ApiBearerAuth()
@@ -25,22 +26,25 @@ export class DoctorsController {
   @Post()
   @ApiOperation({ summary: 'Create a new doctor' })
   @ApiResponse({ status: 201, description: 'Doctor created', type: Doctor })
-  create(@Body() createDoctorDto: CreateDoctorDto): Promise<Doctor> {
-    return this.doctorsService.create(createDoctorDto);
+  create(
+    @Body() createDoctorDto: CreateDoctorDto,
+    @User('clerkUserId') clerkUserId: string,
+  ): Promise<Doctor> {
+    return this.doctorsService.create(createDoctorDto, clerkUserId);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all doctors' })
   @ApiResponse({ status: 200, description: 'List of doctors', type: [Doctor] })
-  findAll(): Promise<Doctor[]> {
-    return this.doctorsService.findAll();
+  findAll(@User('clerkUserId') clerkUserId: string): Promise<Doctor[]> {
+    return this.doctorsService.findAll(clerkUserId);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a doctor by ID' })
   @ApiResponse({ status: 200, description: 'Doctor details', type: Doctor })
-  findOne(@Param('id') id: string): Promise<Doctor> {
-    return this.doctorsService.findOne(+id);
+  findOne(@Param('id') id: string, @User('clerkUserId') clerkUserId: string): Promise<Doctor> {
+    return this.doctorsService.findOne(+id, clerkUserId);
   }
 
   @Patch(':id')
@@ -49,21 +53,22 @@ export class DoctorsController {
   update(
     @Param('id') id: string,
     @Body() updateDoctorDto: UpdateDoctorDto,
+    @User('clerkUserId') clerkUserId: string,
   ): Promise<Doctor> {
-    return this.doctorsService.update(+id, updateDoctorDto);
+    return this.doctorsService.update(+id, updateDoctorDto, clerkUserId);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a doctor' })
   @ApiResponse({ status: 204, description: 'Doctor deleted' })
-  remove(@Param('id') id: string): Promise<void> {
-    return this.doctorsService.remove(+id);
+  remove(@Param('id') id: string, @User('clerkUserId') clerkUserId: string): Promise<void> {
+    return this.doctorsService.remove(+id, clerkUserId);
   }
 
   @Post('demo')
   @ApiOperation({ summary: 'Generate demo doctors' })
   @ApiResponse({ status: 201, description: 'Demo doctors created', type: [Doctor] })
-  generateDemo(): Promise<Doctor[]> {
-    return this.doctorsService.generateDemo();
+  generateDemo(@User('clerkUserId') clerkUserId: string): Promise<Doctor[]> {
+    return this.doctorsService.generateDemo(clerkUserId);
   }
 }

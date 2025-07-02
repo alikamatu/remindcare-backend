@@ -14,6 +14,8 @@ import { UpdatePatientDto } from './dto/update-patient.dto';
 import { Patient } from './patients.entity';
 import { ApiBearerAuth, ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ClerkGuard } from 'src/clerk/clerk.guard';
+import { User } from 'src/user/user.decorators';
+import { User as UserType } from 'src/user/user.entity';
 
 @ApiTags('Management - Patients')
 @ApiBearerAuth()
@@ -25,22 +27,28 @@ export class PatientsController {
   @Post()
   @ApiOperation({ summary: 'Create a new patient' })
   @ApiResponse({ status: 201, description: 'Patient created', type: Patient })
-  create(@Body() createPatientDto: CreatePatientDto): Promise<Patient> {
-    return this.patientsService.create(createPatientDto);
+  create(
+    @Body() createPatientDto: CreatePatientDto,
+    @User('clerkUserId') clerkUserId: string,
+  ): Promise<Patient> {
+    return this.patientsService.create(createPatientDto, clerkUserId);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all patients' })
   @ApiResponse({ status: 200, description: 'List of patients', type: [Patient] })
-  findAll(): Promise<Patient[]> {
-    return this.patientsService.findAll();
+  findAll(@User('clerkUserId') clerkUserId: string): Promise<Patient[]> {
+    return this.patientsService.findAll(clerkUserId);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a patient by ID' })
   @ApiResponse({ status: 200, description: 'Patient details', type: Patient })
-  findOne(@Param('id') id: string): Promise<Patient> {
-    return this.patientsService.findOne(+id);
+  findOne(
+    @Param('id') id: string,
+    @User('clerkUserId') clerkUserId: string,
+  ): Promise<Patient> {
+    return this.patientsService.findOne(+id, clerkUserId);
   }
 
   @Patch(':id')
@@ -49,21 +57,25 @@ export class PatientsController {
   update(
     @Param('id') id: string,
     @Body() updatePatientDto: UpdatePatientDto,
+    @User('clerkUserId') clerkUserId: string,
   ): Promise<Patient> {
-    return this.patientsService.update(+id, updatePatientDto);
+    return this.patientsService.update(+id, updatePatientDto, clerkUserId);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a patient' })
   @ApiResponse({ status: 204, description: 'Patient deleted' })
-  remove(@Param('id') id: string): Promise<void> {
-    return this.patientsService.remove(+id);
+  remove(
+    @Param('id') id: string,
+    @User('clerkUserId') clerkUserId: string,
+  ): Promise<void> {
+    return this.patientsService.remove(+id, clerkUserId);
   }
 
   @Post('demo')
   @ApiOperation({ summary: 'Generate demo patients' })
   @ApiResponse({ status: 201, description: 'Demo patients created', type: [Patient] })
-  generateDemo(): Promise<Patient[]> {
-    return this.patientsService.generateDemo();
+  generateDemo(@User('clerkUserId') clerkUserId: string): Promise<Patient[]> {
+    return this.patientsService.generateDemo(clerkUserId);
   }
 }

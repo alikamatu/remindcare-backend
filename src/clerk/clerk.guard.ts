@@ -24,7 +24,11 @@ export class ClerkGuard implements CanActivate {
       issuer: process.env.CLERK_ISSUER,
     });
 
-    req.user = verified;
+    if (typeof verified !== 'object' || verified === null) {
+      throw new UnauthorizedException('Invalid token payload');
+    }
+
+    req.user = { ...(verified as object), clerkUserId: (verified as any).sub };
     return true;
   }
 }
