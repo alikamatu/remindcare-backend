@@ -1,5 +1,17 @@
-// src/management/patients/dto/create-patient.dto.ts
-import { IsString, IsEmail, IsPhoneNumber, IsOptional, IsNumber, IsDateString } from 'class-validator';
+import { IsString, IsEmail, IsOptional, IsNumber, IsDateString, Validate } from 'class-validator';
+
+import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from 'class-validator';
+
+@ValidatorConstraint({ name: 'phoneFormat', async: false })
+export class PhoneFormatValidator implements ValidatorConstraintInterface {
+  validate(phone: string, args: ValidationArguments) {
+    // Accept +233XXXXXXXXX or 0XXXXXXXXX
+    return /^\+233\d{9}$/.test(phone) || /^0\d{9}$/.test(phone);
+  }
+  defaultMessage(args: ValidationArguments) {
+    return 'Phone number must be in +233XXXXXXXXX or 0XXXXXXXXX format';
+  }
+}
 
 export class CreatePatientDto {
   @IsString()
@@ -11,7 +23,8 @@ export class CreatePatientDto {
   @IsEmail()
   email: string;
 
-  @IsPhoneNumber()
+  @IsString()
+  @Validate(PhoneFormatValidator)
   phone: string;
 
   @IsOptional()

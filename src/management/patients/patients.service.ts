@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Patient } from '../patients/patients.entity';
@@ -14,12 +14,23 @@ export class PatientsService {
     private facilitiesService: FacilitiesService,
   ) {}
 
+    private normalizePhone(raw: string): string {
+    const trimmed = raw.trim();
+      Logger.log(`Normalizing phone: "${raw}" -> "${trimmed}"`);
+    if (/^\+233\d{9}$/.test(trimmed)) return trimmed;
+    if (/^0\d{9}$/.test(trimmed)) return '+233' + trimmed.slice(1);
+    throw new Error('Invalid phone number format. Use +233XXXXXXXXX or 0XXXXXXXXX');
+  }
+
   async create(createPatientDto: CreatePatientDto, clerkUserId: string): Promise<Patient> {
+    createPatientDto.phone = this.normalizePhone(createPatientDto.phone);
     // Only allow creating a patient for a facility owned by the current user
     const facility = await this.facilitiesService.findOne(createPatientDto.facilityId);
     if (!facility || facility.user.clerkUserId !== clerkUserId) {
       throw new NotFoundException('Facility not found or not owned by user');
     }
+    
+    
     const patient = this.patientRepository.create({
       ...createPatientDto,
       facility,
@@ -56,7 +67,7 @@ export class PatientsService {
 
   async update(id: number, updatePatientDto: UpdatePatientDto, clerkUserId: string): Promise<Patient> {
     const patient = await this.findOne(id, clerkUserId);
-
+  
     if (updatePatientDto.facilityId) {
       const facility = await this.facilitiesService.findOne(updatePatientDto.facilityId);
       if (!facility || facility.user.clerkUserId !== clerkUserId) {
@@ -64,7 +75,12 @@ export class PatientsService {
       }
       patient.facility = facility;
     }
-
+  
+    // Normalize phone if provided
+    if (updatePatientDto.phone) {
+      updatePatientDto.phone = this.normalizePhone(updatePatientDto.phone);
+    }
+  
     Object.assign(patient, updatePatientDto);
     return this.patientRepository.save(patient);
   }

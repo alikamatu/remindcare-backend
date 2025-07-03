@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, Like, In } from 'typeorm';
 import { Appointment } from './appointment.entity';
@@ -7,41 +7,60 @@ import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { AppointmentFilterDto } from './dto/appointment-filter.dto';
 import { RiskLevel } from '../shared/constants/risk.constants';
 import { AppointmentStatus } from 'src/shared/constants/appointment.constants';
+import { Patient } from 'src/management/patients/patients.entity';
+import { ArkeselService } from 'src/arkasel/arkesel.service';
 
 @Injectable()
 export class AppointmentsService {
   constructor(
+    private readonly arkasel: ArkeselService,
     @InjectRepository(Appointment)
     private appointmentRepository: Repository<Appointment>,
+    @InjectRepository(Patient) // <-- Add this!
+    private patientRepository: Repository<Patient>,
   ) {}
+  
 
-  async createAppointment(
-    createDto: CreateAppointmentDto,
-    userId: string,
-  ): Promise<Appointment> {
-      if (!createDto.date) {
+async createAppointment(
+  createDto: CreateAppointmentDto,
+  userId: string,
+): Promise<Appointment> {
+  if (!createDto.date) {
     throw new Error('date is required');
   }
-    const appointment = this.appointmentRepository.create({
-      ...createDto,
-      userId,
-    });
+  const appointment = this.appointmentRepository.create({
+    ...createDto,
+    userId,
+  });
 
-    appointment.reminders = this.generateDefaultReminders(
-      new Date(createDto.date),
-      createDto.channel,
-    );
+  appointment.reminders = this.generateDefaultReminders(
+    new Date(createDto.date),
+    createDto.channel,
+  );
 
-    appointment.history = [
-      {
-        event: 'CREATED',
-        timestamp: new Date(),
-        details: { by: userId },
-      },
-    ];
+  appointment.history = [
+    {
+      event: 'CREATED',
+      timestamp: new Date(),
+      details: { by: userId },
+    },
+  ];
 
-    return this.appointmentRepository.save(appointment);
+  const savedAppointment = await this.appointmentRepository.save(appointment);
+
+  // Fetch patient details using patientId from the form
+  const patient = await this.patientRepository.findOne({
+    where: { id: createDto.patientId },
+  });
+
+  if (patient) {
+    // You can now access patient.firstName, patient.lastName, patient.phone, etc.
+    Logger.log(`Patient details: Name: ${patient.firstName} ${patient.lastName}, Phone: ${patient.phone}`);
+    await this.sendReminder(patient);
   }
+
+  return savedAppointment;
+}
 
   async findAll(
     filterDto: AppointmentFilterDto,
@@ -163,5 +182,20 @@ export class AppointmentsService {
     });
     
     return reminders;
+  }
+
+  // Sends a reminder to the patient using the ArkeselService
+  private async sendReminder(patient: Patient): Promise<void> {
+    if (!patient.phone) {
+      Logger.warn('Patient phone number is missing, cannot send reminder.');
+      return;
+    }
+    const message = `Dear ${patient.firstName}, this is a reminder for your upcoming appointment.`;
+    try {
+      await this.arkasel.sendSms(patient.phone, message);
+      Logger.log(`Reminder sent to ${patient.phone}`);
+    } catch (error) {
+      Logger.error(`Failed to send reminder to ${patient.phone}: ${error.message}`);
+    }
   }
 }
