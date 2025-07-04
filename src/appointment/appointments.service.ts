@@ -56,7 +56,7 @@ async createAppointment(
   if (patient) {
     // You can now access patient.firstName, patient.lastName, patient.phone, etc.
     Logger.log(`Patient details: Name: ${patient.firstName} ${patient.lastName}, Phone: ${patient.phone}`);
-    await this.sendReminder(patient);
+    await this.sendReminder(patient, savedAppointment);
   }
 
   return savedAppointment;
@@ -185,12 +185,12 @@ async createAppointment(
   }
 
   // Sends a reminder to the patient using the ArkeselService
-  private async sendReminder(patient: Patient): Promise<void> {
+  private async sendReminder(patient: Patient, appointment: Appointment): Promise<void> {
     if (!patient.phone) {
       Logger.warn('Patient phone number is missing, cannot send reminder.');
       return;
     }
-    const message = `Dear ${patient.firstName}, this is a reminder for your upcoming appointment.`;
+    const message = `Dear ${patient.firstName} ${patient.lastName}, this is a reminder for your upcoming appointment on ${appointment.date}. Please contact us if you have any questions.`;
     try {
       await this.arkasel.sendSms(patient.phone, message);
       Logger.log(`Reminder sent to ${patient.phone}`);
