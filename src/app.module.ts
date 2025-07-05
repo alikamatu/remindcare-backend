@@ -34,8 +34,8 @@ import { ManagementModule } from './management/management.module';
     UserModule,
     BillingModule,
     WebhookModule,
-    // AppointmentModule,
-    // RemindersModule,
+    AppointmentModule,
+    RemindersModule,
     ManagementModule,
     // Add other modules here
   ],
