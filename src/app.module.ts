@@ -33,10 +33,10 @@ import { ManagementModule } from './management/management.module';
     AuthModule,
     UserModule,
     BillingModule,
-    WebhookModule,
-    AppointmentModule,
-    RemindersModule,
-    ManagementModule,
+    // WebhookModule,
+    // AppointmentModule,
+    // RemindersModule,
+    // ManagementModule,
     // Add other modules here
   ],
 })
