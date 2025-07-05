@@ -23,7 +23,7 @@ import { ManagementModule } from './management/management.module';
         type: 'postgres',
         url: config.get<string>('DATABASE_URL'),
         entities: [User, Appointment, Patient, Doctor, Facility],
-        synchronize: true, // Disable in production
+        synchronize: false, // Disable in production
         logging: true,
         ssl: {
           rejectUnauthorized: false,
