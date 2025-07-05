@@ -24,6 +24,7 @@ import { ManagementModule } from './management/management.module';
         url: config.get<string>('DATABASE_URL'),
         entities: [User, Appointment, Patient, Doctor, Facility],
         synchronize: false, // Disable in production
+        logging: false,
         ssl: {
           rejectUnauthorized: false,
         },
