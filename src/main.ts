@@ -9,7 +9,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   app.enableCors({
-    origin: 'https://synchora-ten.vercel.app',
+    origin: ['https://synchora-ten.vercel.app', 'http://localhost:3000'],
     credentials: true,
   });
   

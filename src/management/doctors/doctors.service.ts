@@ -38,6 +38,9 @@ export class DoctorsService {
   }
 
   async findOne(id: number, clerkUserId: string): Promise<Doctor> {
+    if (!id || isNaN(Number(id))) {
+      throw new NotFoundException('Invalid doctor ID');
+    }
     // Only return the doctor if it belongs to a facility owned by the current user
     const doctor = await this.doctorRepository
       .createQueryBuilder('doctor')
@@ -46,7 +49,7 @@ export class DoctorsService {
       .where('doctor.id = :id', { id })
       .andWhere('user.clerkUserId = :clerkUserId', { clerkUserId })
       .getOne();
-
+  
     if (!doctor) {
       throw new NotFoundException(`Doctor with ID ${id} not found for this user`);
     }

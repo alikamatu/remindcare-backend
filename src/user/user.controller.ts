@@ -2,13 +2,14 @@ import { Controller, Get, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
 import { User } from './user.entity';
+import { ClerkGuard } from 'src/clerk/clerk.guard';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('me')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(ClerkGuard)
   async getMe(@Req() req) {
     return this.userService.findByClerkId(req.user.clerkUserId);
   }

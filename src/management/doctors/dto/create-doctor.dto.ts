@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import { IsString, IsEmail, IsPhoneNumber, IsOptional, IsNumber } from 'class-validator';
 
 export class CreateDoctorDto {
@@ -23,7 +24,8 @@ export class CreateDoctorDto {
 
   @IsOptional()
   availability?: Record<string, boolean>;
-
+  
+  @Type(() => Number)
   @IsNumber()
   facilityId: number;
 }
