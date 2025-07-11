@@ -112,7 +112,6 @@ async createAppointment(
   ): Promise<Appointment> {
     const appointment = await this.findOne(id, userId);
 
-    // Add to history if status changed
     if (updateDto.status && updateDto.status !== appointment.status) {
       appointment.history.push({
         event: `STATUS_CHANGED: ${updateDto.status}`,
@@ -136,7 +135,6 @@ async createAppointment(
   async calculateRisk(id: number, userId: string): Promise<Appointment> {
     const appointment = await this.findOne(id, userId);
     
-    // In a real implementation, this would call an ML service
     const noShowProbability = Math.random();
     let riskLevel: RiskLevel;
     
@@ -163,7 +161,6 @@ async createAppointment(
     const reminders: { time: Date; channel: string; sent: boolean }[] = [];
     const appointmentDate = new Date(date);
     
-    // 24 hours before
     const reminder24h = new Date(appointmentDate);
     reminder24h.setHours(reminder24h.getHours() - 24);
     reminders.push({
@@ -172,7 +169,6 @@ async createAppointment(
       sent: false,
     });
     
-    // 2 hours before
     const reminder2h = new Date(appointmentDate);
     reminder2h.setHours(reminder2h.getHours() - 2);
     reminders.push({
@@ -184,7 +180,6 @@ async createAppointment(
     return reminders;
   }
 
-  // Sends a reminder to the patient using the ArkeselService
   private async sendReminder(patient: Patient, appointment: Appointment): Promise<void> {
     if (!patient.phone) {
       Logger.warn('Patient phone number is missing, cannot send reminder.');
