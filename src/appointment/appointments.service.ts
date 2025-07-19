@@ -9,6 +9,7 @@ import { RiskLevel } from '../shared/constants/risk.constants';
 import { AppointmentStatus } from 'src/shared/constants/appointment.constants';
 import { Patient } from 'src/management/patients/patients.entity';
 import { ArkeselService } from 'src/arkasel/arkesel.service';
+import { format } from 'date-fns';
 
 @Injectable()
 export class AppointmentsService {
@@ -131,6 +132,22 @@ async createAppointment(
   ): Promise<Appointment> {
     return this.update(id, { status }, userId);
   }
+
+   async sendReminders(): Promise<void> {
+    const threeDaysFromNow = new Date();
+    threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
+
+    const appointments: Appointment[] = await this.appointmentRepository.find({
+      where: {
+        date: threeDaysFromNow, // Use Date object directly
+      },
+    });
+
+    for (const appointment of appointments) {
+      await this.arkasel.sendSms(appointment.patient?.phone, `Reminder: You have an appointment on ${appointment.date}`);
+    }
+  }
+  
 
   async calculateRisk(id: number, userId: string): Promise<Appointment> {
     const appointment = await this.findOne(id, userId);

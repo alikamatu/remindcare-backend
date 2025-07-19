@@ -78,6 +78,11 @@ export class AppointmentsController {
     return this.appointmentsService.updateStatus(+id, status, userId);
   }
 
+    @Get('reminders')
+  async sendReminders(): Promise<void> {
+    await this.appointmentsService.sendReminders();
+  }
+
   @Get(':id/risk')
   @ApiOperation({ summary: 'Calculate no-show risk for appointment' })
   @ApiResponse({ status: 200, description: 'Risk assessment completed', type: Appointment })
